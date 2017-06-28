@@ -1,0 +1,36 @@
+init:
+	suspi <- {}; misti <- {}; knowni <- {}; unround <- 0; limit_unround <- N 
+Task T1:
+Repeat forever
+	broadcast QUERY (suspi, misti)
+	wait until RESPONSE received from >= alfai processes or unround > limit_unround
+	If unround > limit_unround
+		knowni <- {}
+		unround <- 0
+	Else	   	
+		rec_fromi <- all pj, a RESPONSE is received in line 6
+		For all pj in (knowni - rec_fromi) and (pj, -) not in suspi and pj <> pi do
+			If (pj, ct) in misti
+				Add(suspi, (pj, ct + 1))
+				Remove(misti, (pj, -))
+			Else
+				Add(suspi, (pj, 0))	 	  
+End Repeat
+
+Task T2:
+Upon reception of QUERY (suspj, mistj) from pj do
+Add(knowni, pj)
+For all (px, ctx) in suspj do
+	If px = pi
+		Add(misti, (pi, ctx + 1))
+	If (px, -) not in (suspi U misti) or ((px, ct) in (suspi U misti) and ct < ctx)
+		Add(suspi, (px, ctx))
+		Remove(misti, (px, -))
+End For			
+For all (px, ctx) in mistj do
+If (px, -) not in (suspi U misti) or ((px, ct) in (suspi U misti) and ct < ctx)
+	Add(misti, (px, ctx))
+	Remove(suspi, (px, -))
+	If (px <> pj)
+		Remove(knowni, px)
+send RESPONSE to pj
